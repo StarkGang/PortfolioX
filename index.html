@@ -8,6 +8,15 @@
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>PORTFOLIO-X</title>
       <link rel="stylesheet" href="css/home.css">
+      <link rel="stylesheet" href="css/mascot.css">
+      <script type="importmap">
+         {
+            "imports": {
+               "three": "https://unpkg.com/three@0.170.0/build/three.module.js",
+               "three/addons/": "https://unpkg.com/three@0.170.0/examples/jsm/"
+            }
+         }
+      </script>
       <script src="config.js"></script>
       <script src="js/home.js" defer></script>
    </head>
@@ -74,7 +83,7 @@
                   <div class="icon-label">Education</div>
                </div>
             </div>
-            <div class="desktop-icon" data-app="resume">
+            <div class="desktop-icon" data-app="resume" style="left: 140px; top: 44px;">
                <div class="icon-bg">
                   <svg class="icon-img icon-resume" viewBox="0 0 24 24">
                      <path d="M9 2h6a2 2 0 0 1 2 2h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2-2zm0 2v2h6V4H9zm10 4H5v12h14V8z"/>
@@ -518,5 +527,6 @@
   </div>
 </div>
       </div>
+      <script type="module" src="js/mascot/main.js"></script>
    </body>
 </html>
