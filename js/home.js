@@ -51,34 +51,42 @@ const GRID = {
     colWidth: 120,
     rowHeight: 150,
     paddingX: 24,
-    paddingY: 24
+    paddingY: 44
 };
 
 let desktopLaidOut = false;
 
 function layoutDesktopIcons() {
-    if (desktopLaidOut) return;
     desktopLaidOut = true;
 
     const icons = document.querySelectorAll(".desktop-icon");
+    const isMobile = window.innerWidth <= 600;
+    const paddingX = isMobile ? 12 : GRID.paddingX;
+    const paddingY = isMobile ? 16 : GRID.paddingY;
+    const colWidth = isMobile ? Math.min(105, Math.floor((window.innerWidth - paddingX * 2) / Math.max(2, Math.floor((window.innerWidth - paddingX * 2) / 95)))) : GRID.colWidth;
+    const rowHeight = isMobile ? 116 : GRID.rowHeight;
+
     let col = 0,
         row = 0;
 
     icons.forEach(icon => {
-        const x = GRID.paddingX + col * GRID.colWidth;
-        const y = GRID.paddingY + row * GRID.rowHeight;
+        const x = paddingX + col * colWidth;
+        const y = paddingY + row * rowHeight;
 
         icon.style.left = x + "px";
         icon.style.top = y + "px";
 
         row++;
-        if (y + GRID.rowHeight * 2 > window.innerHeight) {
+        if (y + rowHeight * 2 > window.innerHeight) {
             row = 0;
             col++;
         }
     });
 }
 
+window.addEventListener("resize", () => {
+    if (desktopLaidOut) layoutDesktopIcons();
+});
 
 async function login() {
     if (!firstWallpaperReady) {
@@ -97,8 +105,6 @@ async function login() {
 
     initDesktop();
 }
-
-
 
 function isCellOccupied(x, y, self) {
     return [...document.querySelectorAll(".desktop-icon")].some(icon => {
@@ -143,8 +149,6 @@ function findFreeSlot(startX, startY, self) {
     };
 }
 
-
-
 function renderFavorites() {
     if (!CONFIG.favorites) return;
 
@@ -185,7 +189,7 @@ function renderProjects() {
     const grid = document.getElementById('projects-grid');
 
     grid.innerHTML = projects.map(proj => `
-    <div class="projects-item"> 
+    <div class="projects-item">
       <img src="${proj.image}" class="projects-img">
       <div class="projects-info">
         <div class="projects-name">${proj.title}</div>
@@ -207,8 +211,6 @@ function renderProjects() {
         );
     });
 }
-
-
 
 function initializeWithConfig() {
     if (!window.CONFIG) {
@@ -248,7 +250,6 @@ function snapToGrid(x, y) {
         y: GRID.paddingY + row * GRID.rowHeight
     };
 }
-
 
 function openSocial(platform) {
     const urls = window.CONFIG.social;
@@ -327,7 +328,6 @@ function smartFly(from, to) {
     }, plan.duration * 400);
 }
 
-
 let firstWallpaperReady = false;
 
 async function preloadFirstWallpaper() {
@@ -350,10 +350,7 @@ async function preloadFirstWallpaper() {
     }, 200);
 }
 
-
 const EDUCATION_POINTS = window.CONFIG.education;
-
-
 
 let eduMap = null;
 let eduMarker = null;
@@ -447,7 +444,6 @@ function runEducationStep() {
     );
 }
 
-
 function closeEducation() {
     isEducationRunning = false;
     eduTimers.forEach(clearTimeout);
@@ -482,7 +478,6 @@ const state = {
 };
 preloadFirstWallpaper();
 
-
 function initDesktop() {
     setInterval(() => {
         state.currentWallpaper =
@@ -504,7 +499,6 @@ function preloadImage(src) {
     });
 }
 
-
 let isWallpaperChanging = false;
 
 async function changeWallpaper() {
@@ -524,7 +518,6 @@ async function changeWallpaper() {
         isWallpaperChanging = false;
     }
 }
-
 
 function updateClock() {
     const now = new Date();
@@ -551,7 +544,6 @@ function openFavDetailWindow(name, desc, meta, img) {
     document.getElementById("favdetail-img").src = img;
     openWindow("favdetail");
 }
-
 
 document.querySelector(".start-search").addEventListener("input", (e) => {
     const q = e.target.value.toLowerCase();
@@ -586,7 +578,6 @@ function initDraggableIcons() {
 
             e.preventDefault();
         });
-
 
         document.addEventListener("mousemove", (e) => {
             const icon = document.querySelector(".desktop-icon.dragging");
@@ -649,8 +640,11 @@ function initDraggableIcons() {
         icon.addEventListener("touchend", (e) => {
             if (isDragging && !touchMoved) {
                 e.preventDefault();
-                e.stopPropagation()
+                e.stopPropagation();
                 const app = icon.getAttribute("data-app");
+                if (window.__mascot) {
+                    window.__mascot.brain?.onIconClick(app);
+                }
                 if (app === "resume") {
                     openResume();
                 } else if (app === "education") {
@@ -726,7 +720,6 @@ function initDraggableIcons() {
 
         icon.classList.remove("dragging");
     });
-
 
     document.getElementById("desktop").addEventListener("click", (e) => {
         if (
@@ -829,7 +822,6 @@ async function startSpeedTest() {
     u.textContent = up.toFixed(1) + " Mbps";
 }
 
-
 function openWindow(windowId) {
     const win = document.getElementById(windowId + "-window");
     win.classList.remove("minimizing");
@@ -883,7 +875,6 @@ function openprojectsWindow(title, desc, meta, image, projectUrl) {
     document.getElementById('projectdetail-url').href = projectUrl || '#';
     openWindow('projectdetail');
 }
-
 
 function bringToFront(windowId) {
     document.querySelectorAll(".window").forEach((w) => {
@@ -1025,14 +1016,13 @@ async function sendEmail() {
     const status = document.getElementById("email-status");
 
     const payload = {
-        from: document.getElementById("sender-email").value.trim(),
-        to: window.CONFIG.personal.email,
+        email: document.getElementById("sender-email").value.trim(),
         subject: document.getElementById("email-subject").value.trim(),
         message: document.getElementById("email-body").value.trim(),
         source: "portfolio-x"
     };
 
-    if (!payload.from || !payload.message) {
+    if (!payload.email || !payload.message) {
         status.className = "email-status error";
         status.textContent = "Sender email and message required";
         return;
@@ -1046,7 +1036,8 @@ async function sendEmail() {
         const res = await fetch(CONFIG.api.mailEndpoint, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Accept": "application/json"
             },
             body: JSON.stringify(payload)
         });
